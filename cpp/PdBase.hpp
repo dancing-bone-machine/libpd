@@ -24,6 +24,11 @@
 	#define HAVE_UNISTD_H
 #endif
 
+// define this to use C++11 std::mutex for locking
+#ifdef LIBPD_USE_STD_MUTEX
+	#include <mutex>
+#endif
+
 typedef struct _atom t_atom;
 
 namespace pd {
@@ -171,6 +176,18 @@ class PdBase {
 		virtual void unsubscribe(const std::string& source);
 		virtual bool exists(const std::string& source); ///< is a receiver subscribed?
 		virtual void unsubscribeAll(); ///< receivers will be unsubscribed from *all* sources
+
+		/// process the interal message queue
+		///
+		/// internall, libpd is using a ringbuffer to pass messages & midi without
+		/// needing to require locking (mutexes)
+		///
+		/// call these in a loop somewhere in order to receive waiting messages
+		/// or midi data which are then sent to the appropriate
+		/// PdReceivers & PdMidiReceivers
+		///
+		void receiveMessages();
+		void receiveMidi();
 
 		/// poll for messages
 		///
@@ -444,6 +461,12 @@ class PdBase {
 			SYSEX,
 			SYSRT
 		};
+
+		#ifdef LIBPD_USE_STD_MUTEX
+			std::mutex mutex; //< locks libpd C function calls,
+			                  //< enable by defining LIBPD_USE_STD_MUTEX
+		#endif
+		bool processRet; //< process function return
 
 		/// a singleton libpd instance wrapper
 		class PdContext {
