@@ -47,3 +47,7 @@ libs/libpdcsharp.*
 
 # java
 java-build/*
+
+# vim
+*.un~
+
