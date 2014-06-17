@@ -18,6 +18,7 @@ else
     SOLIB_PREFIX = 
     PDNATIVE_PLATFORM = windows
     PDNATIVE_ARCH = $(shell $(CC) -dumpmachine | sed -e 's,-.*,,' -e 's,i[3456]86,x86,' -e 's,amd64,x86_64,')
+    JAVA_HOME ?= /c/java
     PLATFORM_CFLAGS = -DWINVER=0x502 -DWIN32 -D_WIN32 -DPD_INTERNAL -O3 \
       -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/win32"
     MINGW_LDFLAGS = -shared -lws2_32 -lkernel32
@@ -119,7 +120,7 @@ CXXFLAGS = $(CFLAGS) -std=c++11 -DLIBPD_USE_STD_MUTEX
 
 libpd: $(LIBPD)
 
-$(LIBPD): ${PD_FILES:.c=.o}
+$(LIBPD): ${PD_FILES:.c=.o} ${LIBPD_UTILS:.c=.o}
 	$(CC) -o $(LIBPD) $^ $(LDFLAGS) -lm -lpthread 
 
 javalib: $(JNIH_FILE) $(PDJAVA_JAR)
